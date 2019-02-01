@@ -650,7 +650,7 @@ func (p *ParserATNSimulator) removeAllConfigsNotInRuleStopState(configs ATNConfi
 		if lookToEndOfRule && config.GetState().GetEpsilonOnlyTransitions() {
 			NextTokens := p.atn.NextTokens(config.GetState(), nil)
 			if NextTokens.contains(TokenEpsilon) {
-				endOfRuleState := p.atn.ruleToStopState[config.GetState().GetRuleIndex()]
+				endOfRuleState := p.atn.RuleToStopState[config.GetState().GetRuleIndex()]
 				result.Add(NewBaseATNConfig4(config, endOfRuleState), p.mergeCache)
 			}
 		}
@@ -771,7 +771,7 @@ func (p *ParserATNSimulator) applyPrecedenceFilter(configs ATNConfigSet) ATNConf
 }
 
 func (p *ParserATNSimulator) getReachableTarget(trans Transition, ttype int) ATNState {
-	if trans.Matches(ttype, 0, p.atn.maxTokenType) {
+	if trans.Matches(ttype, 0, p.atn.MaxTokenType) {
 		return trans.getTarget()
 	}
 
@@ -1382,11 +1382,11 @@ func (p *ParserATNSimulator) addDFAEdge(dfa *DFA, from *DFAState, t int, to *DFA
 		return nil
 	}
 	to = p.addDFAState(dfa, to) // used existing if possible not incoming
-	if from == nil || t < -1 || t > p.atn.maxTokenType {
+	if from == nil || t < -1 || t > p.atn.MaxTokenType {
 		return to
 	}
 	if from.edges == nil {
-		from.edges = make([]*DFAState, p.atn.maxTokenType+1+1)
+		from.edges = make([]*DFAState, p.atn.MaxTokenType+1+1)
 	}
 	from.edges[t+1] = to // connect
 

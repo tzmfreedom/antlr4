@@ -142,7 +142,7 @@ func (b *BaseRecognizer) GetTokenType(tokenName string) int {
 //        Map<String, Integer> result = tokenTypeMapCache.Get(vocabulary)
 //        if (result == null) {
 //            result = new HashMap<String, Integer>()
-//            for (int i = 0; i < GetATN().maxTokenType; i++) {
+//            for (int i = 0; i < GetATN().MaxTokenType; i++) {
 //                String literalName = vocabulary.getLiteralName(i)
 //                if (literalName != null) {
 //                    result.put(literalName, i)

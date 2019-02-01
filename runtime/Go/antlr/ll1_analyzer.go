@@ -188,12 +188,12 @@ func (la *LL1Analyzer) look1(s, stopState ATNState, ctx PredictionContext, look 
 		} else if t.getIsEpsilon() {
 			la.look1(t.getTarget(), stopState, ctx, look, lookBusy, calledRuleStack, seeThruPreds, addEOF)
 		} else if _, ok := t.(*WildcardTransition); ok {
-			look.addRange(TokenMinUserTokenType, la.atn.maxTokenType)
+			look.addRange(TokenMinUserTokenType, la.atn.MaxTokenType)
 		} else {
 			set := t.getLabel()
 			if set != nil {
 				if _, ok := t.(*NotSetTransition); ok {
-					set = set.complement(TokenMinUserTokenType, la.atn.maxTokenType)
+					set = set.complement(TokenMinUserTokenType, la.atn.MaxTokenType)
 				}
 				look.addSet(set)
 			}

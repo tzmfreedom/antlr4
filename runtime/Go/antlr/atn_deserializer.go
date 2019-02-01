@@ -236,13 +236,13 @@ func (a *ATNDeserializer) readRules(atn *ATN) {
 		atn.ruleToTokenType = make([]int, nrules) // TODO: initIntArray(nrules, 0)
 	}
 
-	atn.ruleToStartState = make([]*RuleStartState, nrules) // TODO: initIntArray(nrules, 0)
+	atn.RuleToStartState = make([]*RuleStartState, nrules) // TODO: initIntArray(nrules, 0)
 
 	for i := 0; i < nrules; i++ {
 		s := a.readInt()
 		startState := atn.states[s].(*RuleStartState)
 
-		atn.ruleToStartState[i] = startState
+		atn.RuleToStartState[i] = startState
 
 		if atn.grammarType == ATNTypeLexer {
 			tokenType := a.readInt()
@@ -255,14 +255,14 @@ func (a *ATNDeserializer) readRules(atn *ATN) {
 		}
 	}
 
-	atn.ruleToStopState = make([]*RuleStopState, nrules) //initIntArray(nrules, 0)
+	atn.RuleToStopState = make([]*RuleStopState, nrules) //initIntArray(nrules, 0)
 
 	for i := 0; i < len(atn.states); i++ {
 		state := atn.states[i]
 
 		if s2, ok := state.(*RuleStopState); ok {
-			atn.ruleToStopState[s2.ruleIndex] = s2
-			atn.ruleToStartState[s2.ruleIndex].stopState = s2
+			atn.RuleToStopState[s2.ruleIndex] = s2
+			atn.RuleToStartState[s2.ruleIndex].stopState = s2
 		}
 	}
 }
@@ -334,7 +334,7 @@ func (a *ATNDeserializer) readEdges(atn *ATN, sets []*IntervalSet) {
 
 			outermostPrecedenceReturn := -1
 
-			if atn.ruleToStartState[t.getTarget().GetRuleIndex()].isPrecedenceRule {
+			if atn.RuleToStartState[t.getTarget().GetRuleIndex()].isPrecedenceRule {
 				if t.precedence == 0 {
 					outermostPrecedenceReturn = t.getTarget().GetRuleIndex()
 				}
@@ -342,7 +342,7 @@ func (a *ATNDeserializer) readEdges(atn *ATN, sets []*IntervalSet) {
 
 			trans := NewEpsilonTransition(t.followState, outermostPrecedenceReturn)
 
-			atn.ruleToStopState[t.getTarget().GetRuleIndex()].AddTransition(trans, -1)
+			atn.RuleToStopState[t.getTarget().GetRuleIndex()].AddTransition(trans, -1)
 		}
 	}
 
@@ -423,10 +423,10 @@ func (a *ATNDeserializer) readLexerActions(atn *ATN) {
 }
 
 func (a *ATNDeserializer) generateRuleBypassTransitions(atn *ATN) {
-	count := len(atn.ruleToStartState)
+	count := len(atn.RuleToStartState)
 
 	for i := 0; i < count; i++ {
-		atn.ruleToTokenType[i] = atn.maxTokenType + i + 1
+		atn.ruleToTokenType[i] = atn.MaxTokenType + i + 1
 	}
 
 	for i := 0; i < count; i++ {
@@ -454,7 +454,7 @@ func (a *ATNDeserializer) generateRuleBypassTransition(atn *ATN, idx int) {
 	var excludeTransition Transition
 	var endState ATNState
 
-	if atn.ruleToStartState[idx].isPrecedenceRule {
+	if atn.RuleToStartState[idx].isPrecedenceRule {
 		// Wrap from the beginning of the rule to the StarLoopEntryState
 		endState = nil
 
@@ -473,7 +473,7 @@ func (a *ATNDeserializer) generateRuleBypassTransition(atn *ATN, idx int) {
 			panic("Couldn't identify final state of the precedence rule prefix section.")
 		}
 	} else {
-		endState = atn.ruleToStopState[idx]
+		endState = atn.RuleToStopState[idx]
 	}
 
 	// All non-excluded transitions that currently target end state need to target
@@ -495,7 +495,7 @@ func (a *ATNDeserializer) generateRuleBypassTransition(atn *ATN, idx int) {
 	}
 
 	// All transitions leaving the rule start state need to leave blockStart instead
-	ruleToStartState := atn.ruleToStartState[idx]
+	ruleToStartState := atn.RuleToStartState[idx]
 	count := len(ruleToStartState.GetTransitions())
 
 	for count > 0 {
@@ -504,7 +504,7 @@ func (a *ATNDeserializer) generateRuleBypassTransition(atn *ATN, idx int) {
 	}
 
 	// Link the new states
-	atn.ruleToStartState[idx].AddTransition(NewEpsilonTransition(bypassStart, -1), -1)
+	atn.RuleToStartState[idx].AddTransition(NewEpsilonTransition(bypassStart, -1), -1)
 	bypassStop.AddTransition(NewEpsilonTransition(endState, -1), -1)
 
 	MatchState := NewBasicState()
@@ -550,7 +550,7 @@ func (a *ATNDeserializer) markPrecedenceDecisions(atn *ATN) {
 		// We analyze the ATN to determine if a ATN decision state is the
 		// decision for the closure block that determines whether a
 		// precedence rule should continue or complete.
-		if atn.ruleToStartState[state.GetRuleIndex()].isPrecedenceRule {
+		if atn.RuleToStartState[state.GetRuleIndex()].isPrecedenceRule {
 			maybeLoopEndState := state.GetTransitions()[len(state.GetTransitions())-1].getTarget()
 
 			if s3, ok := maybeLoopEndState.(*LoopEndState); ok {
